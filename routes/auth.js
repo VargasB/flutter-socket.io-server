@@ -24,5 +24,4 @@ router.post('/', [
 //Validar JWT
 router.get('/renew', validarJWT ,renewToken);
 
-
 module.exports = router;
