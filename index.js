@@ -2,33 +2,44 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-//DB congif
-const {dbConnection} = require('./database/config').dbConnection();
+// DB Config
+require('./database/config').dbConnection();
 
-//App de Express
+
+// App de Express
 const app = express();
 
-//LEctura y parseo del body
-app.use(express.json());
+// Lectura y parseo del Body
+app.use( express.json() );
 
-//Node Server
+
+// Node Server
 const server = require('http').createServer(app);
 module.exports.io = require('socket.io')(server);
 require('./sockets/socket');
 
 
 
-// Path publico
-const publicPath = path.resolve( __dirname, 'public');
-app.use(express.static(publicPath));
 
-//Mis rutas
-app.use('/api/login', require('./routes/auth'));
+// Path público
+const publicPath = path.resolve( __dirname, 'public' );
+app.use( express.static( publicPath ) );
 
 
-server.listen(process.env.PORT, (err) => {
+
+// Mis Rutas
+app.use( '/api/login', require('./routes/auth') );
+app.use( '/api/usuarios', require('./routes/usuarios') );
+app.use( '/api/mensajes', require('./routes/mensajes') );
+
+
+
+server.listen( process.env.PORT, ( err ) => {
 
     if ( err ) throw new Error(err);
 
-    console.log('Servidor corriendo en puerto !!!!!', process.env.PORT);
+    console.log('Servidor corriendo en puerto', process.env.PORT );
+
 });
+
+

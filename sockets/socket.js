@@ -1,21 +1,40 @@
+const { io } = require('../index');
+const { comprobarJWT } = require('../helpers/jwt');
+const { usuarioConectado, usuarioDesconectado, grabarMensaje } = require('../controllers/socket');
 
-const {io} = require('../index');
+// Mensajes de Sockets
+io.on('connection', (client) =>  {
+    const [ valido, uid ] = comprobarJWT( client.handshake.headers['x-token'] )
 
+    // Verificar autenticación
+    if ( !valido ) { return client.disconnect(); }
+    
+    // Cliente autenticado
+    usuarioConectado( uid );
 
-//Mensajes de Sockets
-io.on('connection', client => {
+    // Ingresar al usuario a una sala en particular
+    // sala global, client.id, 5f298534ad4169714548b785
+    client.join( uid );
 
-    console.log('Cliente conectado');
+    // Escuchar del cliente el mensaje-personal
+    client.on('mensaje-personal', async( payload ) => {
+        // TODO: Grabar mensaje
+        await grabarMensaje( payload );
+        io.to( payload.para ).emit('mensaje-personal', payload );
+    })
+    
 
+    client.on('disconnect', () => {
+        usuarioDesconectado(uid);
+    });
 
-    client.on('disconnect', () => { 
-        console.log('Cliente desconectado')
-     });
+    
 
-    // client.on('mensaje', (payload) => {
-    //     console.log('Mensajeeee', payload);
+    
+    // client.on('mensaje', ( payload ) => {
+    //     console.log('Mensaje', payload);
+    //     io.emit( 'mensaje', { admin: 'Nuevo mensaje' } );
+    // });
 
-    //     io.emit('mensaje', {admin: 'Nuevo mensaje'});
-    // }); 
 
 });
